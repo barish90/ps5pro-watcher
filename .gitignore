@@ -1,0 +1,4 @@
+.env
+state.json
+watcher.log
+__pycache__/
