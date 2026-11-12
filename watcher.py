@@ -418,8 +418,9 @@ def run(dry_run: bool, only: set[str] | None):
 
     # one warning email when a store has been failing for a long time, cleared when it recovers
     limit = CONFIG.get("failure_alert_after_runs", 36)
+    quiet = {s["id"] for s in CONFIG["browser_stores"] if s.get("warn_on_failure") is False}
     for name, n in state["failures"].items():
-        if n >= limit and not state["warned"].get(name) and not dry_run:
+        if n >= limit and name not in quiet and not state["warned"].get(name) and not dry_run:
             try:
                 if send_email(f"PS5 Pro watcher: {name} check is failing",
                               f"The {name} check has failed {n} times in a row.\nLast error: {checked.get(name)}\n"

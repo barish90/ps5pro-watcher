@@ -7,7 +7,8 @@
   "browser_stores": [
     {"id": "walmart", "name": "Walmart", "type": "walmart"},
     {"id": "amazon", "name": "Amazon.ca", "type": "amazon", "asins": ["B0DGYL8TDZ", "B0FR94FV8J"]},
-    {"id": "ebgames", "name": "EB Games", "type": "tiles",
+    {"id": "ebgames", "name": "EB Games", "type": "tiles", "warn_on_failure": false,
+     "_note": "Cloudflare usually blocks this from GitHub servers; works from a home PC",
      "url": "https://www.ebgames.ca/shop?search=playstation+5+pro",
      "in_stock": "in stock|add to cart|available online|ship to home",
      "out_of_stock": "unavailable|out of stock|sold out|pre-?owned"},
