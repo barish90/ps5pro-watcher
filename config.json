@@ -5,6 +5,7 @@
   "_bestbuy_store_ids_note": "Richmond Hill, Woodbridge, Downsview, Markham, Aurora, Vaughan Mills, Hillcrest, Centerpoint, Yorkdale, Fairview, Yonge-Eglinton, Albion",
   "failure_alert_after_runs": 36,
   "browser_stores": [
+    {"id": "walmart", "name": "Walmart", "type": "walmart"},
     {"id": "amazon", "name": "Amazon.ca", "type": "amazon", "asins": ["B0DGYL8TDZ", "B0FR94FV8J"]},
     {"id": "ebgames", "name": "EB Games", "type": "tiles",
      "url": "https://www.ebgames.ca/shop?search=playstation+5+pro",

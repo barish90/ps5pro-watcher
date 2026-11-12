@@ -114,14 +114,26 @@ def check_bestbuy() -> list[Hit]:
 
 
 # --------------------------------------------------------------------------- Walmart (page JSON)
-def check_walmart() -> list[Hit]:
+WALMART_URL = "https://www.walmart.ca/en/search?q=playstation+5+pro+console"
+
+
+def check_walmart(page=None, store=None) -> list[Hit]:
+    """Fast path: plain request. If Walmart rate-limits it (common from cloud servers), load the page in Chrome."""
     from curl_cffi import requests
-    r = requests.get("https://www.walmart.ca/en/search?q=playstation+5+pro+console",
-                     impersonate="chrome", timeout=30)
-    m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', r.text, re.S)
-    if not m:
-        raise RuntimeError(f"Walmart page had no product data (HTTP {r.status_code}, probably bot-blocked)")
-    data = json.loads(m.group(1))
+    raw, why = None, ""
+    try:
+        r = requests.get(WALMART_URL, impersonate="chrome", timeout=30)
+        m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', r.text, re.S)
+        raw, why = (m.group(1) if m else None), f"HTTP {r.status_code}"
+    except Exception as e:
+        why = str(e)[:80]
+    if raw is None and page is not None:
+        log.info("  walmart: plain request failed (%s), using browser", why)
+        goto(page, WALMART_URL, 6000)
+        raw = evaluate(page, "() => (document.getElementById('__NEXT_DATA__') || {}).textContent || null")
+    if not raw:
+        raise RuntimeError(f"Walmart page had no product data ({why}, probably bot-blocked)")
+    data = json.loads(raw)
 
     def walk(o):
         if isinstance(o, dict):
@@ -293,7 +305,7 @@ def check_product(page, store) -> list[Hit]:
     return []
 
 
-BROWSER_CHECKS = {"amazon": check_amazon, "tiles": check_tiles, "product": check_product}
+BROWSER_CHECKS = {"walmart": check_walmart, "amazon": check_amazon, "tiles": check_tiles, "product": check_product}
 
 
 # --------------------------------------------------------------------------- Notify
@@ -360,7 +372,6 @@ def run(dry_run: bool, only: set[str] | None):
             log.warning("%s failed (%d in a row): %s", name, state["failures"][name], str(e)[:300])
 
     attempt("bestbuy", check_bestbuy)
-    attempt("walmart", check_walmart)
 
     stores = [s for s in CONFIG["browser_stores"] if s.get("enabled", True) and (not only or s["id"] in only)]
     if stores:
